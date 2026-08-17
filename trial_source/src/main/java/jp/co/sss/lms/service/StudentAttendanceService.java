@@ -1,6 +1,7 @@
 package jp.co.sss.lms.service;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -251,6 +252,18 @@ public class StudentAttendanceService {
 					.dateToString(attendanceManagementDto.getTrainingDate(), "yyyy年M月d日(E)"));
 			dailyAttendanceForm.setStatusDispName(attendanceManagementDto.getStatusDispName());
 
+			TrainingTime startTime = new TrainingTime(dailyAttendanceForm.getTrainingStartTime());
+			if (startTime != null && startTime.isNotBlank()) {
+				dailyAttendanceForm.setStartTimeHour(startTime.getHour());
+				dailyAttendanceForm.setStartTimeMinute(startTime.getMinute());
+			}
+
+			TrainingTime endTime = new TrainingTime(dailyAttendanceForm.getTrainingEndTime());
+			if (endTime != null && endTime.isNotBlank()) {
+				dailyAttendanceForm.setEndTimeHour(endTime.getHour());
+				dailyAttendanceForm.setEndTimeMinute(endTime.getMinute());
+			}
+
 			attendanceForm.getAttendanceList().add(dailyAttendanceForm);
 		}
 
@@ -332,6 +345,48 @@ public class StudentAttendanceService {
 		}
 		// 完了メッセージ
 		return messageUtil.getMessage(Constants.PROP_KEY_ATTENDANCE_UPDATE_NOTICE);
+	}
+
+	public Boolean notEnterCheck() {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String currentDate = sdf.format(new Date());
+
+		Integer count = tStudentAttendanceMapper.notEnterCount(loginUserDto.getLmsUserId(),
+				Constants.DB_FLG_FALSE, currentDate);
+
+		if (count != null && count > 0) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public void formatConversion(AttendanceForm attendanceForm) {
+
+		for (DailyAttendanceForm dailyForm : attendanceForm.getAttendanceList()) {
+
+			if (dailyForm.getStartTimeHour() != null && dailyForm.getStartTimeMinute() != null) {
+				String formattedStart = String.format("%02d:%02d", dailyForm.getStartTimeHour(),
+						dailyForm.getStartTimeMinute());
+				dailyForm.setTrainingStartTime(formattedStart);
+			}
+
+			if (dailyForm.getEndTimeHour() != null && dailyForm.getEndTimeMinute() != null) {
+				String formattedEnd = String.format("%02d:%02d", dailyForm.getEndTimeHour(),
+						dailyForm.getEndTimeMinute());
+				dailyForm.setTrainingEndTime(formattedEnd);
+			}
+
+			TrainingTime startTime = new TrainingTime(dailyForm.getTrainingStartTime());
+			TrainingTime endTime = new TrainingTime(dailyForm.getTrainingEndTime());
+
+			if (startTime.isNotBlank() && endTime.isNotBlank()) {
+				if (startTime.compareTo(endTime) > 0) {
+					dailyForm.setIsError(true);
+				}
+			}
+		}
 	}
 
 }
