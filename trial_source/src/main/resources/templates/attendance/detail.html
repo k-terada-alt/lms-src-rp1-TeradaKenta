@@ -75,16 +75,35 @@
 		</div>
 	</div>
 
-		<script th:inline="javascript">
+	<script th:inline="javascript">
 
-			window.onload = function () {
+		window.onload = function () {
 
-				if (/*[[${notEnterFlg}]]*/ false) {
-					alert("過去日の勤怠に未入力があります。");
-				}
-			};
+			if (/*[[${notEnterFlg}]]*/ false) {
+				alert("過去日の勤怠に未入力があります。");
+			}
 
-		</script>
+			updateClock();
+			setInterval(updateClock, 1000);
+		};
+
+
+		function updateClock() {
+			var now = new Date();
+			var hours = now.getHours();
+			var minutes = now.getMinutes();
+
+			if (hours < 10) hours = "0" + hours;
+			if (minutes < 10) minutes = "0" + minutes;
+
+			var timeString = "現在の時刻は " + hours + ":" + minutes + " です。";
+
+			var nowElement = document.getElementById("now");
+			if (nowElement) {
+				nowElement.innerHTML = timeString;
+			}
+		}
+	</script>
 
 </body>
 
