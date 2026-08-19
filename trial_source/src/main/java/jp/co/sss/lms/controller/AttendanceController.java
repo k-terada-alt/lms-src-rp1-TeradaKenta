@@ -40,13 +40,20 @@ public class AttendanceController {
 	 * @throws ParseException
 	 */
 	@RequestMapping(path = "/detail", method = RequestMethod.GET)
-	public String index(Model model) {
+	// ★メソッドに「throws ParseException」を追加してコンパイルエラーを解消します
+	public String index(Model model) throws ParseException {
 
+		// 勤怠管理画面用DTOリストの取得のため、下記パラメータを設定する
+		// コースID ＝ ログイン情報DTO．コースID、LMSユーザーID ＝ ログイン情報DTO．LMSユーザID
 		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
 
+		// 現在より過去に未入力が無いかチェック（Task25）
+		// サービス側のチェック処理を呼び出し、未入力カウント数が0より大きい場合 true を取得
 		Boolean hasUnenteredPastDays = studentAttendanceService.notEnterCheck();
+		
+		// 取得した結果（true/false）をモデル属性に設定し、画面側のダイアログ表示制御に利用する
 		model.addAttribute("notEnterFlg", hasUnenteredPastDays);
 
 		return "attendance/detail";

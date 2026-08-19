@@ -94,14 +94,21 @@
 		WHERE student_attendance_id = #{studentAttendanceId}
 	</update>
 
+	<!-- Task.25 現在日付より前日付で勤怠未入力件数を取得 -->
 	<select id="notEnterCount" resultType="java.lang.Integer">
 		SELECT COUNT(*)
 		FROM
 		t_student_attendance
-		WHERE lms_user_id = #{lmsUserId}
+		WHERE 
+		<!-- 1. LMSユーザID ＝ 入力パラメーター．LMSユーザID -->
+		lms_user_id = #{lmsUserId}
+		<!-- 2. 削除フラグ ＝ 入力パラメーター．削除フラグ -->
 		AND delete_flg = #{deleteFlg}
+		<!-- 3. 日付 ＜ 入力パラメーター．日付 -->
 		AND training_date &lt; #{trainingDate}::timestamp
+		<!-- 4. 勤怠状態 != 1 （欠席ステータスは除外） -->
 		AND status &lt;&gt; 1
+		<!-- 5. 出勤時間・退勤時間の未入力（NULLまたは空文字）チェック -->
 		AND (
 		training_start_time IS NULL OR training_start_time = ''
 		OR training_end_time IS NULL OR training_end_time = ''

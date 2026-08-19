@@ -54,12 +54,12 @@
 								</th:block>
 								<td class="w140">[[${dailyAttendanceForm.dispTrainingDate}]]</td>
 								<td class="w300">[[${dailyAttendanceForm.sectionName}]]</td>
-								<td class="w160" style="vertical-align: middle;">
+								<td class="w70" style="vertical-align: middle;">
 									<div style="display: flex; align-items: center; gap: 8px;">
 										<select th:name="|attendanceList[${stat.index}].startTimeHour|"
 											class="form-control"
-											style="width: 65px; padding: 6px 4px; display: inline-block;">
-											<option value="">時</option>
+											style="width: 65px; padding: 6px 4px;">
+											<option value=""></option>
 											<option th:each="h : ${#numbers.sequence(0, 23)}" th:value="${h}"
 												th:text="${h &lt; 10 ? '0' + h : h}"
 												th:selected="${h == dailyAttendanceForm.startTimeHour}"></option>
@@ -68,19 +68,19 @@
 										<select th:name="|attendanceList[${stat.index}].startTimeMinute|"
 											class="form-control"
 											style="width: 65px; padding: 6px 4px; display: inline-block;">
-											<option value="">分</option>
+											<option value=""></option>
 											<option th:each="m : ${#numbers.sequence(0, 59)}" th:value="${m}"
 												th:text="${m &lt; 10 ? '0' + m : m}"
 												th:selected="${m == dailyAttendanceForm.startTimeMinute}"></option>
 										</select>
 									</div>
 								</td>
-								<td class="w160" style="vertical-align: middle;">
+								<td class="w70" style="vertical-align: middle;">
 									<div style="display: flex; align-items: center; gap: 8px;">
 										<select th:name="|attendanceList[${stat.index}].endTimeHour|"
 											class="form-control"
 											style="width: 65px; padding: 6px 4px; display: inline-block;">
-											<option value="">時</option>
+											<option value=""></option>
 											<option th:each="h : ${#numbers.sequence(0, 23)}" th:value="${h}"
 												th:text="${h &lt; 10 ? '0' + h : h}"
 												th:selected="${h == dailyAttendanceForm.endTimeHour}"></option>
@@ -89,14 +89,14 @@
 										<select th:name="|attendanceList[${stat.index}].endTimeMinute|"
 											class="form-control"
 											style="width: 65px; padding: 6px 4px; display: inline-block;">
-											<option value="">分</option>
+											<option value=""></option>
 											<option th:each="m : ${#numbers.sequence(0, 59)}" th:value="${m}"
 												th:text="${m &lt; 10 ? '0' + m : m}"
 												th:selected="${m == dailyAttendanceForm.endTimeMinute}"></option>
 										</select>
 									</div>
 								</td>
-								<td class="w80">
+								<td class="w90">
 									<select th:name="|attendanceList[${stat.index}].blankTime|" class="form-control">
 										<option th:each="blankTime : ${attendanceForm.blankTimes}"
 											th:value="${blankTime.key}" th:inlne="text" class="form-control"
@@ -104,7 +104,7 @@
 											[[${blankTime.value}]]</option>
 									</select>
 								</td>
-								<td class="w70">[[${dailyAttendanceForm.statusDispName}]]</td>
+								<td class="w90">[[${dailyAttendanceForm.statusDispName}]]</td>
 								<td class="w240">
 									<input type="text" th:name="|attendanceList[${stat.index}].note|"
 										th:value="${dailyAttendanceForm.note}" class="form-control"></input>
