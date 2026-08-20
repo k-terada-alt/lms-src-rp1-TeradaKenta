@@ -374,7 +374,6 @@ public class StudentAttendanceService {
 		// 完了メッセージ
 		return messageUtil.getMessage(Constants.PROP_KEY_ATTENDANCE_UPDATE_NOTICE);
 	}
-
 	
 	/**
 	 * Task.25 過去日の未入力チェック
@@ -400,9 +399,7 @@ public class StudentAttendanceService {
 		}
 
 		return false;
-	}
-
-	
+	}	
 	
 	public void formatConversion(AttendanceForm attendanceForm) {
 
