@@ -361,12 +361,14 @@ public class StudentAttendanceService {
 
 		// 今日の日付を取得する（フォーマットパターンを設定）
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String currentDate = sdf.format(new Date());
+		
+		//String型で受け取った現在日付をDate型に変換
+		Date today = sdf.parse(sdf.format(new Date())); 
 
 		// 勤怠情報（受講生入力）APIを呼び出し、過去日の未入力件数を取得
-		// 引数: LMSユーザID、削除フラグ(0:生かす)、現在日付
+		// 引数: loginUserDtoからLMSユーザIDを取得、削除フラグをutil.Constantsから取得(0)、現在日付を設定
 		Integer count = tStudentAttendanceMapper.notEnterCount(loginUserDto.getLmsUserId(),
-				Constants.DB_FLG_FALSE, currentDate);
+				Constants.DB_FLG_FALSE, today);
 
 		// 件数が 0 より大きければ true、そうでなければ false を戻す
 		if (count != null && count > 0) {
@@ -376,6 +378,8 @@ public class StudentAttendanceService {
 		return false;
 	}
 
+	
+	
 	public void formatConversion(AttendanceForm attendanceForm) {
 
 		// 念のため null チェック（リストが空でなければ処理を継続）
