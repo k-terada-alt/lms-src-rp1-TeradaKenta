@@ -33,15 +33,19 @@ public class AttendanceController {
 	/**
 	 * 勤怠管理画面 初期表示
 	 * 
-	 * @param lmsUserId
-	 * @param courseId
-	 * @param model
+	 * @param lmsUserId LMSユーザーID
+	 * @param courseId コースID
+	 * @param model リクエストスコープ
 	 * @return 勤怠管理画面
 	 * @throws ParseException
 	 */
 	@RequestMapping(path = "/detail", method = RequestMethod.GET)
-	// ★メソッドに「throws ParseException」を追加してコンパイルエラーを解消します
 	public String index(Model model) throws ParseException {
+
+		//寺田健大 -Task25
+		//現在より過去に未入力が無いかチェック
+		//サービス側のチェック処理を呼び出し、未入力カウント数が0より大きい場合trueを取得
+		Boolean notEnter = studentAttendanceService.notEnterCheck();
 
 		// 勤怠管理画面用DTOリストの取得のため、下記パラメータを設定する
 		// コースID ＝ ログイン情報DTO．コースID、LMSユーザーID ＝ ログイン情報DTO．LMSユーザID
@@ -49,12 +53,9 @@ public class AttendanceController {
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
 
-		// 現在より過去に未入力が無いかチェック（Task25）
-		// サービス側のチェック処理を呼び出し、未入力カウント数が0より大きい場合 true を取得
-		Boolean hasUnenteredPastDays = studentAttendanceService.notEnterCheck();
-		
-		// 取得した結果（true/false）をモデル属性に設定し、画面側のダイアログ表示制御に利用する
-		model.addAttribute("notEnterFlg", hasUnenteredPastDays);
+		//寺田健大 -Task25
+		//取得した結果(true/false)をリクエストスコープに保存する
+		model.addAttribute("notEnter", notEnter);
 
 		return "attendance/detail";
 	}
@@ -139,15 +140,20 @@ public class AttendanceController {
 	 * @throws ParseException
 	 */
 	@RequestMapping(path = "/update", params = "complete", method = RequestMethod.POST)
-	public String complete(AttendanceForm attendanceForm, Model model, BindingResult result)
+	public String complete(AttendanceForm attendanceForm, BindingResult result, Model model)
 			throws ParseException {
-		
+
 		studentAttendanceService.formatConversion(attendanceForm);
-		
-		// 更新
+
+		studentAttendanceService.updateInputCheck(attendanceForm, result);
+
+		if (result.hasErrors()) {
+			return "attendance/update";
+		}
+
 		String message = studentAttendanceService.update(attendanceForm);
 		model.addAttribute("message", message);
-		// 一覧の再取得
+		
 		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);

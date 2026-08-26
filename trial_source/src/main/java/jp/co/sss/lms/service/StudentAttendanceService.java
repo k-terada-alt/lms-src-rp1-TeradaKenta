@@ -351,34 +351,41 @@ public class StudentAttendanceService {
 	}
 
 	/**
-	 * Task.25 過去日の未入力チェック
+	 * 過去日の未入力チェック
 	 * 概要：今日より前の過去日に、未入力の勤怠があるかどうかを判定する。
 	 * 
+	 * @author 寺田健大 -Task25
 	 * @return Boolean 未入力日がある場合(件数が0より大きい)はtrue、そうでない場合はfalse
 	 * @throws ParseException 日付パース時の例外
 	 */
 	public Boolean notEnterCheck() throws ParseException {
 
-		// 今日の日付を取得する（フォーマットパターンを設定）
+		//寺田健大 -Task25
+		//今日の日付を取得する(フォーマットパターンを設定)
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		
-		//String型で受け取った現在日付をDate型に変換
-		Date today = sdf.parse(sdf.format(new Date())); 
 
-		// 勤怠情報（受講生入力）APIを呼び出し、過去日の未入力件数を取得
-		// 引数: loginUserDtoからLMSユーザIDを取得、削除フラグをutil.Constantsから取得(0)、現在日付を設定
-		Integer count = tStudentAttendanceMapper.notEnterCount(loginUserDto.getLmsUserId(),
-				Constants.DB_FLG_FALSE, today);
+		//寺田健大 -Task25
+		//formatメソッドから現在日付を取得する
+		//String型で受け取った現在日付をparseメソッドでDate型に変換
+		Date trainingDate = sdf.parse(sdf.format(new Date())); 
 
-		// 件数が 0 より大きければ true、そうでなければ false を戻す
+		//寺田健大 -Task25
+		//勤怠情報(受講生入力)APIを呼び出し、過去日の未入力件数を取得
+		//引数:loginUserDtoからLMSユーザIDを取得、削除フラグをutil.Constantsから取得(0)、現在日付を設定
+		Integer count = tStudentAttendanceMapper.notEnterCount(
+				loginUserDto.getLmsUserId(),
+				Constants.DB_FLG_FALSE,
+				trainingDate
+				);
+
+		//寺田健大 -Task25
+		//件数が0より大きければtrue、そうでなければfalseを戻す
 		if (count != null && count > 0) {
 			return true;
 		}
 
 		return false;
-	}
-
-	
+	}	
 	
 	public void formatConversion(AttendanceForm attendanceForm) {
 

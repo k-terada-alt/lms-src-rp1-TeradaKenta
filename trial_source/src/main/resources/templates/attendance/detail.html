@@ -77,9 +77,11 @@
 
 	<script th:inline="javascript">
 
+		<!-- 寺田健大 Task25-->
 		window.onload = function () {
 
-			if (/*[[${notEnterFlg}]]*/ false) {
+			//リクエストスコープに保存した未入力チェックの結果がtrueの場合、ダイアログを表示させる
+			if (/*[[${notEnter}]]*/ false) {
 				alert("過去日の勤怠に未入力があります。");
 			}
 
@@ -93,17 +95,11 @@
 			var hours = now.getHours();
 			var minutes = now.getMinutes();
 
-			if (hours < 10) hours = "0" + hours;
-			if (minutes < 10) minutes = "0" + minutes;
-
-			var timeString = "現在の時刻は " + hours + ":" + minutes + " です。";
-
-			var nowElement = document.getElementById("now");
-			if (nowElement) {
-				nowElement.innerHTML = timeString;
-			}
-		}
-	</script>
+			if (hours < 10) hours = "0" + hours; if (minutes < 10) minutes = "0" + minutes; var timeString = "現在の時刻は " + hours + ":" +
+				minutes + " です。"; var nowElement = document.getElementById("now"); if (nowElement) {
+					nowElement.innerHTML = timeString;
+				}
+		} </script>
 
 </body>
 
