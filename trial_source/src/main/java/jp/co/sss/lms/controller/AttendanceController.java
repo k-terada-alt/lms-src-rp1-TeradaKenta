@@ -33,6 +33,7 @@ public class AttendanceController {
 	/**
 	 * 勤怠管理画面 初期表示
 	 * 
+	 * @author 寺田健大 -Task25
 	 * @param lmsUserId LMSユーザーID
 	 * @param courseId コースID
 	 * @param model リクエストスコープ
@@ -42,16 +43,16 @@ public class AttendanceController {
 	@RequestMapping(path = "/detail", method = RequestMethod.GET)
 	public String index(Model model) throws ParseException {
 
-		//寺田健大 -Task25
-		//現在より過去に未入力が無いかチェック
-		//サービス側のチェック処理を呼び出し、未入力カウント数が0より大きい場合trueを取得
-		Boolean notEnter = studentAttendanceService.notEnterCheck();
-
 		// 勤怠管理画面用DTOリストの取得のため、下記パラメータを設定する
 		// コースID ＝ ログイン情報DTO．コースID、LMSユーザーID ＝ ログイン情報DTO．LMSユーザID
 		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
+
+		//寺田健大 -Task25
+		//現在より過去に未入力が無いかチェック
+		//サービス側のチェック処理を呼び出し、未入力カウント数が0より大きい場合trueを取得
+		Boolean notEnter = studentAttendanceService.notEnterCheck();
 
 		//寺田健大 -Task25
 		//取得した結果(true/false)をリクエストスコープに保存する
@@ -153,7 +154,7 @@ public class AttendanceController {
 
 		String message = studentAttendanceService.update(attendanceForm);
 		model.addAttribute("message", message);
-		
+
 		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
