@@ -147,4 +147,58 @@ public class AttendanceUtil {
 		return false;
 	}
 
+	/**
+	 * 選択用（出勤/退勤）の時マップを取得
+	 * 
+	 * @return 時マップ(00〜23)
+	 */
+	public LinkedHashMap<Integer, String> getHourMap() {
+		LinkedHashMap<Integer, String> hourMap = new LinkedHashMap<>();
+		hourMap.put(null, "");
+		for (int i = 0; i <= 23; i++) {
+			hourMap.put(i, String.format("%02d", i));
+		}
+		return hourMap;
+	}
+
+	/**
+	 * 選択用（出勤/退勤）の分マップを取得
+	 * 
+	 * @return 分マップ(00〜59)
+	 */
+	public LinkedHashMap<Integer, String> getMinuteMap() {
+		LinkedHashMap<Integer, String> minuteMap = new LinkedHashMap<>();
+		minuteMap.put(null, "");
+		for (int i = 0; i <= 59; i++) {
+			minuteMap.put(i, String.format("%02d", i));
+		}
+		return minuteMap;
+	}
+
+	/**
+	 * 時間の文字列(hh:mm)から「時」を抜き出す
+	 * 
+	 * @param timeStr 時間の文字列
+	 * @return 時（数値）、空ならnull
+	 */
+	public Integer getHourFromString(String timeStr) {
+		if (timeStr == null || timeStr.length() < 5) {
+			return null;
+		}
+		return Integer.parseInt(timeStr.substring(0, 2));
+	}
+
+	/**
+	 * 時間の文字列(hh:mm)から「分」を抜き出す
+	 * 
+	 * @param timeStr 時間の文字列
+	 * @return 分（数値）、空ならnull
+	 */
+	public Integer getMinuteFromString(String timeStr) {
+		if (timeStr == null || timeStr.length() < 5) {
+			return null;
+		}
+		return Integer.parseInt(timeStr.substring(3, 5));
+	}
+
 }
