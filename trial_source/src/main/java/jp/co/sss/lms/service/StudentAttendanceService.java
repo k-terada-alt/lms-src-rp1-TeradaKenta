@@ -367,7 +367,7 @@ public class StudentAttendanceService {
 		//寺田健大 -Task25
 		//formatメソッドから現在日付を取得する
 		//String型で受け取った現在日付をparseメソッドでDate型に変換
-		Date trainingDate = sdf.parse(sdf.format(new Date())); 
+		Date trainingDate = sdf.parse(sdf.format(new Date()));
 
 		//寺田健大 -Task25
 		//勤怠情報(受講生入力)APIを呼び出し、過去日の未入力件数を取得
@@ -375,8 +375,7 @@ public class StudentAttendanceService {
 		Integer count = tStudentAttendanceMapper.notEnterCount(
 				loginUserDto.getLmsUserId(),
 				Constants.DB_FLG_FALSE,
-				trainingDate
-				);
+				trainingDate);
 
 		//寺田健大 -Task25
 		//件数が0より大きければtrue、そうでなければfalseを戻す
@@ -385,8 +384,8 @@ public class StudentAttendanceService {
 		}
 
 		return false;
-	}	
-	
+	}
+
 	public void formatConversion(AttendanceForm attendanceForm) {
 
 		// 念のため null チェック（リストが空でなければ処理を継続）
@@ -418,7 +417,7 @@ public class StudentAttendanceService {
 		}
 
 		int count = 0;
-		boolean hasAnyError = false; 
+		boolean hasAnyError = false;
 
 		for (DailyAttendanceForm dailyForm : attendanceForm.getAttendanceList()) {
 
@@ -434,14 +433,24 @@ public class StudentAttendanceService {
 			boolean hasEndMinute = (dailyForm.getEndTimeMinute() != null);
 
 			if (hasStartHour != hasStartMinute) {
-				result.rejectValue("attendanceList[" + count + "].trainingStartTime", "input.invalid",
-						new Object[] { "出勤時間" }, null);
+				if (!hasStartHour) {
+					result.rejectValue("attendanceList[" + count + "].startTimeHour", "input.invalid",
+							new Object[] { "出勤時間" }, null);
+				} else {
+					result.rejectValue("attendanceList[" + count + "].startTimeMinute", "input.invalid",
+							new Object[] { "出勤時間" }, null);
+				}
 				hasAnyError = true;
 			}
 
 			if (hasEndHour != hasEndMinute) {
-				result.rejectValue("attendanceList[" + count + "].trainingEndTime", "input.invalid",
-						new Object[] { "退勤時間" }, null);
+				if (!hasEndHour) {
+					result.rejectValue("attendanceList[" + count + "].endTimeHour", "input.invalid",
+							new Object[] { "退勤時間" }, null);
+				} else {
+					result.rejectValue("attendanceList[" + count + "].endTimeMinute", "input.invalid",
+							new Object[] { "退勤時間" }, null);
+				}
 				hasAnyError = true;
 			}
 
@@ -449,27 +458,31 @@ public class StudentAttendanceService {
 			boolean isEndEntered = (hasEndHour && hasEndMinute);
 
 			if (!isStartEntered && isEndEntered) {
-				result.rejectValue("attendanceList[" + count + "].trainingStartTime", "attendance.punchInEmpty",
+				result.rejectValue("attendanceList[" + count + "].startTimeHour", "attendance.punchInEmpty",
+						new Object[] { "出勤時間" }, null);
+				result.rejectValue("attendanceList[" + count + "].startTimeMinute", "attendance.punchInEmpty",
 						new Object[] { "出勤時間" }, null);
 				hasAnyError = true;
 				isStartEntered = false;
 			}
 
-			boolean hasTimeFieldError = result.hasFieldErrors("attendanceList[" + count + "].trainingStartTime")
-					|| result.hasFieldErrors("attendanceList[" + count + "].trainingEndTime");
+			boolean hasTimeFieldError = result.hasFieldErrors("attendanceList[" + count + "].startTimeHour")
+					|| result.hasFieldErrors("attendanceList[" + count + "].startTimeMinute")
+					|| result.hasFieldErrors("attendanceList[" + count + "].endTimeHour")
+					|| result.hasFieldErrors("attendanceList[" + count + "].endTimeMinute");
 
 			if (!hasTimeFieldError && isStartEntered && isEndEntered) {
-				if (dailyForm.getTrainingStartTime() != null && dailyForm.getTrainingEndTime() != null) {
-					LocalTime startTime = LocalTime.parse(dailyForm.getTrainingStartTime());
-					LocalTime endTime = LocalTime.parse(dailyForm.getTrainingEndTime());
-					if (startTime.isAfter(endTime) || startTime.equals(endTime)) {
-						result.rejectValue("attendanceList[" + count + "].trainingStartTime",
-								"attendance.trainingTimeRange",
-								new Object[] { "出勤時刻", "退勤時刻" }, null);
-						hasTimeFieldError = true;
-						hasAnyError = true;
-					}
-				}
+			    if (dailyForm.getTrainingStartTime() != null && dailyForm.getTrainingEndTime() != null) {
+			        LocalTime startTime = LocalTime.parse(dailyForm.getTrainingStartTime());
+			        LocalTime endTime = LocalTime.parse(dailyForm.getTrainingEndTime());
+			        if (startTime.isAfter(endTime) || startTime.equals(endTime)) {
+			            result.rejectValue("attendanceList[" + count + "].startTimeHour", "attendance.trainingTimeRange", new Object[] { "出勤時刻", "退勤時刻" }, null);
+			            result.addError(new org.springframework.validation.FieldError(result.getObjectName(), "attendanceList[" + count + "].endTimeHour", ""));
+			            
+			            hasTimeFieldError = true;
+			            hasAnyError = true;
+			        }
+			    }
 			}
 
 			if (!hasTimeFieldError && isStartEntered && isEndEntered && dailyForm.getBlankTime() != null) {
