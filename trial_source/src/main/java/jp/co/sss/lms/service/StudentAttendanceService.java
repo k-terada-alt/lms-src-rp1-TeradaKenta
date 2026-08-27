@@ -362,7 +362,7 @@ public class StudentAttendanceService {
 
 		//寺田健大 -Task25
 		//今日の日付を取得する(フォーマットパターンを設定)
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATE_FORMAT);
 
 		//寺田健大 -Task25
 		//formatメソッドから現在日付を取得する
