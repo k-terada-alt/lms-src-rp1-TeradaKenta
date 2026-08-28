@@ -211,6 +211,7 @@ public class StudentAttendanceService {
 	/**
 	 * 勤怠フォームへ設定
 	 * 
+	 * @author 寺田健大 -Task26
 	 * @param attendanceManagementDtoList
 	 * @return 勤怠編集フォーム
 	 */
@@ -257,16 +258,24 @@ public class StudentAttendanceService {
 					.dateToString(attendanceManagementDto.getTrainingDate(), "yyyy年M月d日(E)"));
 			dailyAttendanceForm.setStatusDispName(attendanceManagementDto.getStatusDispName());
 
+			//寺田健大 -Task26
+			//出勤時間を取得
 			String startStr = dailyAttendanceForm.getTrainingStartTime();
-
+			
+			//勤怠Utilを使用し時間を「時間」と「分」に分割する
 			dailyAttendanceForm.setStartTimeHour(attendanceUtil.getHourFromString(startStr));
 			dailyAttendanceForm.setStartTimeMinute(attendanceUtil.getMinuteFromString(startStr));
 
+			//寺田健大 -Task26
+			//退勤時間を取得
 			String endStr = dailyAttendanceForm.getTrainingEndTime();
 
+			//勤怠Utilを使用し時間を「時間」と「分」に分割する
 			dailyAttendanceForm.setEndTimeHour(attendanceUtil.getHourFromString(endStr));
 			dailyAttendanceForm.setEndTimeMinute(attendanceUtil.getMinuteFromString(endStr));
 
+			//寺田健大 -Task26
+			//分割した時間をリストに入れなおす
 			attendanceForm.getAttendanceList().add(dailyAttendanceForm);
 		}
 
@@ -386,23 +395,34 @@ public class StudentAttendanceService {
 		return false;
 	}
 
+	/**
+	 * 画面から入力された時・分のデータをDB保存用の「hh:mm」形式に変換してセットする。
+	 * 
+	 * @author 寺田健大 -Task26
+	 * @param attendanceForm 勤怠一覧画面のフォームオブジェクト
+	 */
 	public void formatConversion(AttendanceForm attendanceForm) {
 
-		// 念のため null チェック（リストが空でなければ処理を継続）
+		//寺田健大 -Task26
+		// 念のため null チェック(リストが空でなければ処理を継続)
 		if (attendanceForm == null || attendanceForm.getAttendanceList() == null) {
 			return;
 		}
 
+		//寺田健大 -Task26
+		//日別で時間をセットする
 		for (DailyAttendanceForm dailyForm : attendanceForm.getAttendanceList()) {
 
-			// 出勤の「時」「分」が共に入力されている場合のみ、%02d:%02d 形式でセット
+			//寺田健大 -Task26
+			// 出勤の「時」「分」が共に入力されている場合のみ、%02d:%02d形式でセット
 			if (dailyForm.getStartTimeHour() != null && dailyForm.getStartTimeMinute() != null) {
 				String formattedStart = String.format("%02d:%02d", dailyForm.getStartTimeHour(),
 						dailyForm.getStartTimeMinute());
 				dailyForm.setTrainingStartTime(formattedStart);
 			}
 
-			// 退勤の「時」「分」が共に入力されている場合のみ、%02d:%02d 形式でセット
+			//寺田健大 -Task26
+			// 退勤の「時」「分」が共に入力されている場合のみ、%02d:%02d形式でセット
 			if (dailyForm.getEndTimeHour() != null && dailyForm.getEndTimeMinute() != null) {
 				String formattedEnd = String.format("%02d:%02d", dailyForm.getEndTimeHour(),
 						dailyForm.getEndTimeMinute());
@@ -411,7 +431,17 @@ public class StudentAttendanceService {
 		}
 	}
 
+	/**
+	 * 勤怠入力データの一括バリデーションチェック
+	 * 
+	 * @author 寺田健大 -Task27
+	 * @param attendanceForm 勤怠一覧画面のフォームオブジェクト
+	 * @param result エラー情報を格納するBindingResult
+	 */
 	public void updateInputCheck(AttendanceForm attendanceForm, BindingResult result) {
+
+		//寺田健大 -Task27
+		//ガード句による不正データの早期リターン
 		if (attendanceForm == null || attendanceForm.getAttendanceList() == null) {
 			return;
 		}
@@ -419,19 +449,25 @@ public class StudentAttendanceService {
 		int count = 0;
 		boolean hasAnyError = false;
 
+		//勤怠明細一覧を1日ずつループしてチェック
 		for (DailyAttendanceForm dailyForm : attendanceForm.getAttendanceList()) {
 
+			//寺田健大 -Task27
+			//備考欄の文字数チェック(100文字上限)
 			if (dailyForm.getNote() != null && dailyForm.getNote().length() > 100) {
 				result.rejectValue("attendanceList[" + count + "].note", "maxlength",
 						new Object[] { "備考", 100 }, null);
 				hasAnyError = true;
 			}
 
+			//各パーツ(時・分)の入力有無を判定するフラグ
 			boolean hasStartHour = (dailyForm.getStartTimeHour() != null);
 			boolean hasStartMinute = (dailyForm.getStartTimeMinute() != null);
 			boolean hasEndHour = (dailyForm.getEndTimeHour() != null);
 			boolean hasEndMinute = (dailyForm.getEndTimeMinute() != null);
 
+			//寺田健大 -Task27
+			//出勤時間の「時・分」の片方のみ入力されている場合の個別エラー装飾
 			if (hasStartHour != hasStartMinute) {
 				if (!hasStartHour) {
 					result.rejectValue("attendanceList[" + count + "].startTimeHour", "input.invalid",
@@ -443,6 +479,8 @@ public class StudentAttendanceService {
 				hasAnyError = true;
 			}
 
+			//寺田健大 -Task27
+			//退勤時間の「時・分」の片方のみ入力されている場合の個別エラー装飾
 			if (hasEndHour != hasEndMinute) {
 				if (!hasEndHour) {
 					result.rejectValue("attendanceList[" + count + "].endTimeHour", "input.invalid",
@@ -457,6 +495,8 @@ public class StudentAttendanceService {
 			boolean isStartEntered = (hasStartHour && hasStartMinute);
 			boolean isEndEntered = (hasEndHour && hasEndMinute);
 
+			//寺田健大 -Task27
+			//出勤未入力かつ退勤のみ入力されている場合の相関エラーチェック
 			if (!isStartEntered && isEndEntered) {
 				result.rejectValue("attendanceList[" + count + "].startTimeHour", "attendance.punchInEmpty",
 						new Object[] { "出勤時間" }, null);
@@ -466,25 +506,36 @@ public class StudentAttendanceService {
 				isStartEntered = false;
 			}
 
+			//各時間パーツの個別エラーの有無を検知
 			boolean hasTimeFieldError = result.hasFieldErrors("attendanceList[" + count + "].startTimeHour")
 					|| result.hasFieldErrors("attendanceList[" + count + "].startTimeMinute")
 					|| result.hasFieldErrors("attendanceList[" + count + "].endTimeHour")
 					|| result.hasFieldErrors("attendanceList[" + count + "].endTimeMinute");
 
+			//寺田健大 -Task27
+			//出勤時刻 ≧ 退勤時刻 の矛盾チェックと画面メッセージ重複防止制御
 			if (!hasTimeFieldError && isStartEntered && isEndEntered) {
-			    if (dailyForm.getTrainingStartTime() != null && dailyForm.getTrainingEndTime() != null) {
-			        LocalTime startTime = LocalTime.parse(dailyForm.getTrainingStartTime());
-			        LocalTime endTime = LocalTime.parse(dailyForm.getTrainingEndTime());
-			        if (startTime.isAfter(endTime) || startTime.equals(endTime)) {
-			            result.rejectValue("attendanceList[" + count + "].startTimeHour", "attendance.trainingTimeRange", new Object[] { "出勤時刻", "退勤時刻" }, null);
-			            result.addError(new org.springframework.validation.FieldError(result.getObjectName(), "attendanceList[" + count + "].endTimeHour", ""));
-			            
-			            hasTimeFieldError = true;
-			            hasAnyError = true;
-			        }
-			    }
+				if (dailyForm.getTrainingStartTime() != null && dailyForm.getTrainingEndTime() != null) {
+					LocalTime startTime = LocalTime.parse(dailyForm.getTrainingStartTime());
+					LocalTime endTime = LocalTime.parse(dailyForm.getTrainingEndTime());
+					if (startTime.isAfter(endTime) || startTime.equals(endTime)) {
+
+						//出勤側にメッセージ付きエラーを登録して画面に出力
+						result.rejectValue("attendanceList[" + count + "].startTimeHour",
+								"attendance.trainingTimeRange", new Object[] { "出勤時刻", "退勤時刻" }, null);
+
+						//退勤側は空文字のエラーを個別登録し、画面上の二重出力を防ぎつつプルダウンのみを赤く染める
+						result.addError(new org.springframework.validation.FieldError(result.getObjectName(),
+								"attendanceList[" + count + "].endTimeHour", ""));
+
+						hasTimeFieldError = true;
+						hasAnyError = true;
+					}
+				}
 			}
 
+			//寺田健大 -Task27
+			//中抜け時間が勤務可能時間を超えているかの相関エラーチェック
 			if (!hasTimeFieldError && isStartEntered && isEndEntered && dailyForm.getBlankTime() != null) {
 				if (dailyForm.getTrainingStartTime() != null && dailyForm.getTrainingEndTime() != null) {
 					LocalTime startTime = LocalTime.parse(dailyForm.getTrainingStartTime());
@@ -504,6 +555,8 @@ public class StudentAttendanceService {
 			count++;
 		}
 
+		//寺田健大 -Task27
+		//エラー発生時、入力途中のマッピング用マップデータを再保持して画面崩れを防止
 		if (hasAnyError) {
 			attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
 			attendanceForm.setHourMap(attendanceUtil.getHourMap());
